@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>[Project Title] — Project Page</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .placeholder-img {
+    background:
+      linear-gradient(135deg, rgba(0,0,0,.04) 25%, transparent 25%) 0 0/16px 16px,
+      linear-gradient(225deg, rgba(0,0,0,.04) 25%, transparent 25%) 0 0/16px 16px,
+      #e5e7eb;
+    color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; letter-spacing: .05em; text-transform: uppercase;
+  }
+  .placeholder-img.dark {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.05) 25%, transparent 25%) 0 0/16px 16px,
+      linear-gradient(225deg, rgba(255,255,255,.05) 25%, transparent 25%) 0 0/16px 16px,
+      #1f2937;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body class="bg-white text-slate-900">
+
+<!-- ───────────── Top nav ───────────── -->
+<header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur text-slate-100 border-b border-white/10">
+  <div class="max-w-6xl mx-auto px-5 h-12 flex items-center justify-between text-sm">
+    <a href="#" class="font-semibold tracking-wide">[SPATIALUNCERTAIN]</a>
+    <nav class="hidden md:flex gap-5 text-slate-300">
+      <a href="#problem"     class="hover:text-white">The Problem</a>
+      <a href="#demos"       class="hover:text-white">Demos</a>
+      <a href="#findings"    class="hover:text-white">Findings</a>
+      <a href="#resources"   class="hover:text-white">Resources</a>
+      <a href="#bibtex"      class="hover:text-white">BibTeX</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ───────────── Hero ───────────── -->
+<section class="bg-slate-900 text-slate-100">
+  <div class="max-w-4xl mx-auto px-5 pt-12 pb-10 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+      Seeing Isn’t Knowing:<br/>
+      Do VLMs Know When <span class="text-sky-300">Not to Answer</span> Spatial Questions (and Why)?
+    </h1>
+    <p class="mt-7 text-base md:text-lg text-slate-200">
+      Yue Zhang<sup>1</sup>, Zun Wang<sup>1</sup>, Han Lin<sup>1</sup>, Yonatan Bitton<sup>2</sup>, Idan Szpektor<sup>2</sup>, Mohit Bansal<sup>1</sup>
+    </p>
+    <p class="mt-2 text-sm md:text-base text-slate-400">
+      <sup>1</sup>UNC Chapel Hill · <sup>2</sup>Google Research
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3 justify-center">
+      <a href="#" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold">📄 Paper</a>
+      <a href="#" class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">💻 Code</a>
+      <a href="#" class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">📦 Dataset</a>
+      <a href="#demos" class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">▶ Try Demo</a>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── Teaser figure (below hero) ───────────── -->
+<section class="pt-8 pb-10 bg-white">
+  <div class="max-w-7xl mx-auto px-5">
+    <figure>
+      <img src="images/teaser_img.png"
+           alt="Three conditions in SPATIALUNCERTAIN: Clean View (answerable), Occlusion (missing information, unanswerable), and Perspective Ambiguity (unreliable information, requires view selection)."
+           class="w-full h-auto rounded-xl" />
+      <figcaption class="mt-3 px-2 text-center text-sm text-slate-600">
+        From a 3D scene, we render multiple 2D observations and construct three conditions:
+        <strong>(a) Clean View</strong> — sufficient information, answerable;
+        <strong>(b) Occlusion</strong> — missing information, requires abstention;
+        <strong>(c) Perspective Ambiguity</strong> — unreliable information, requires abstention and informative-view selection.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ───────────── Abstract ───────────── -->
+<section id="abstract" class="py-20">
+  <div class="max-w-4xl mx-auto px-5">
+    <h2 class="text-3xl font-bold text-center">Abstract</h2>
+    <div class="mt-8 bg-slate-50 border border-slate-200 rounded-xl p-6 md:p-8">
+      <p class="text-slate-700 leading-relaxed">
+        Visual observations are inherently limited views of a 3D world — occlusion hides
+        objects and perspective makes geometry unreliable — yet existing spatial reasoning
+        benchmarks assume observations are sufficient, evaluating only answer correctness
+        rather than whether models know <em>when</em> a question cannot be reliably answered.
+        We introduce <strong>SPATIALUNCERTAIN</strong>, a controlled 3D benchmark with two
+        observation challenges — <strong>occlusion</strong> (hiding target information)
+        and <strong>perspective ambiguity</strong> (misleading visual cues) — where each
+        question is answerable under clean views but requires abstention under the
+        challenge condition. Across frontier VLMs (GPT-4o, GPT-5.4, Gemini-3.0-Flash,
+        Qwen2.5-VL, InternVL), we find two consistent failure modes: <em>overconfident
+        answering</em> (~30% accuracy under occlusion, &lt;10% under perspective ambiguity)
+        and <em>near-random performance</em> on selecting viewpoints that would resolve
+        ambiguity. Structured prompting partially improves abstention but trades off
+        answerable accuracy, while fine-tuning on diverse ambiguity conditions yields
+        more robust observational uncertainty — suggesting this capability is learnable
+        but requires exposure to varied uncertainty signals.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── Pipeline Demos ───────────── -->
+<style>
+  .pcv {
+    position: relative; width: 100%; height: 215px;
+    background: #f1f5f9; border-radius: 0.5rem; overflow: hidden;
+    cursor: grab;
+  }
+  .pcv:active { cursor: grabbing; }
+  .pcv canvas { display: block; width: 100% !important; height: 100% !important; }
+  .pcv .pcv-msg {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
+    color: #94a3b8; pointer-events: none; padding: 1rem;
+  }
+</style>
+
+<section id="demos" class="py-20">
+  <div class="max-w-7xl mx-auto px-5">
+    <h2 class="text-3xl font-bold text-center">How the Benchmark Is Built</h2>
+    <p class="text-center text-slate-600 mt-3 max-w-2xl mx-auto">
+      Two data-generation pipelines, shown stage by stage. The 3D scenes auto-rotate —
+      drag to look around.
+    </p>
+
+    <!-- ░░ Occlusion pipeline ░░ -->
+    <div class="mt-14">
+      <h3 class="text-xl font-semibold mb-5 flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+        Occlusion Pipeline
+      </h3>
+      <div class="grid gap-5 md:grid-cols-3">
+
+        <!-- Step 1 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 1</div>
+          <h4 class="font-semibold mt-1">3D Scene</h4>
+          <div class="pcv mt-3" data-src="models/occ_clean.glb"></div>
+          <video class="walk-vid mt-2 rounded-lg w-full h-[235px] object-cover bg-slate-100"
+                 src="videos/occ_clean.mp4" autoplay muted loop playsinline></video>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            A clean 3D indoor scene with the target object fully visible.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 2</div>
+          <h4 class="font-semibold mt-1">+ Occluder Injected</h4>
+          <div class="pcv mt-3" data-src="models/occ_occluder.glb"></div>
+          <video class="walk-vid mt-2 rounded-lg w-full h-[235px] object-cover bg-slate-100"
+                 src="videos/occ_occluder.mp4" autoplay muted loop playsinline></video>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            An occluder object is added between the camera and the target.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 3</div>
+          <h4 class="font-semibold mt-1">Views &amp; QA Generation</h4>
+          <img class="auto-img mt-3 rounded-lg w-full object-cover" style="height:215px"
+               src="images/occ_view.png" alt="occluded rendered view" />
+          <div class="mt-3 rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs space-y-2">
+            <p class="text-slate-500">Q: What's the relationship between the bench and the door?</p>
+            <p><span class="text-emerald-600 font-semibold">Clean:</span> answerable → "Left"</p>
+            <p><span class="text-rose-600 font-semibold">Occluded:</span> abstain → "Cannot Determine"</p>
+          </div>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            Depending on the camera the target is clean, partially, or fully occluded.
+            Visibility, Relative Position, Depth Ordering &amp; Size questions are
+            answerable clean but require abstention once occluded.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ░░ Perspective pipeline ░░ -->
+    <div class="mt-16">
+      <h3 class="text-xl font-semibold mb-5 flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+        Perspective Pipeline
+      </h3>
+      <div class="grid gap-5 md:grid-cols-3">
+
+        <!-- Step 1 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-sky-600 font-semibold">Step 1</div>
+          <h4 class="font-semibold mt-1">Selected Object Pair</h4>
+          <div class="pcv mt-3" data-src="models/persp_scene.glb"></div>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            A pair of comparable objects (e.g. two artworks) is chosen in the 3D scene.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-sky-600 font-semibold">Step 2</div>
+          <h4 class="font-semibold mt-1">Selected Reference View</h4>
+          <img class="auto-img mt-3 rounded-lg aspect-video object-cover w-full" src="images/persp_reference.png" alt="equidistant reference view" />
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            Equidistant view — apparent size reflects true size. Answerable.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
+          <div class="text-xs uppercase tracking-widest text-sky-600 font-semibold">Step 3</div>
+          <h4 class="font-semibold mt-1">Ambiguous View &amp; QA</h4>
+          <img class="auto-img mt-3 rounded-lg aspect-video object-cover w-full" src="images/persp_ambiguous.png" alt="perspective-distorted ambiguous view" />
+          <div class="mt-3 rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs space-y-2">
+            <p class="text-slate-500">Q: Are the two benches the same size?</p>
+            <p><span class="text-rose-600 font-semibold">Ambiguous:</span> abstain</p>
+            <p><span class="text-sky-600 font-semibold">Then:</span> "Which view resolves it?" → View 1</p>
+          </div>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
+            Perspective-distorted view — nearer object looks larger, requiring abstention.
+            On abstention, the model must pick an informative view (single- &amp; two-stage).
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Any .auto-img that fails to load degrades to a labeled placeholder box
+// (so missing assets show their expected path instead of a broken icon).
+document.querySelectorAll("img.auto-img").forEach((img) => {
+  img.addEventListener("error", () => {
+    const ph = document.createElement("div");
+    ph.className = img.className.replace("auto-img", "") +
+      " placeholder-img flex items-center justify-center text-[10px]";
+    ph.textContent = img.getAttribute("src");
+    img.replaceWith(ph);
+  });
+});
+
+// Slow down the walkthrough videos (no HTML attribute for playbackRate).
+const VIDEO_RATE = 0.6;
+document.querySelectorAll("video.walk-vid").forEach((v) => {
+  const setRate = () => { v.playbackRate = VIDEO_RATE; };
+  setRate();
+  v.addEventListener("loadedmetadata", setRate);
+  v.addEventListener("play", setRate);
+});
+</script>
+
+<script type="module">
+// ── Custom point-cloud viewer ──────────────────────────────────────────────
+// Renders a GLB point cloud with adjustable point size + distance attenuation,
+// auto-rotation, and drag-to-orbit. Bigger points fill the gaps between samples
+// so the cloud reads as a continuous surface instead of sparse pinpricks.
+import * as THREE from "three";
+import { GLTFLoader }    from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// Tweak here if it still looks sparse/dense:
+const POINT_SIZE   = 0.018;   // world-space point radius (bigger = denser look)
+const ROTATE_SPEED = 2.3;     // auto-rotation speed
+
+function showMsg(el, text) {
+  const m = document.createElement("div");
+  m.className = "pcv-msg";
+  m.textContent = text;
+  el.appendChild(m);
+}
+
+function initViewer(el) {
+  const src = el.dataset.src;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf1f5f9);
+
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  el.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = false;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = ROTATE_SPEED;
+
+  function resize() {
+    const w = el.clientWidth, h = el.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(el);
+
+  new GLTFLoader().load(
+    src,
+    (gltf) => {
+      let pts = null;
+      gltf.scene.traverse((o) => { if (o.isPoints) pts = o; });
+      if (!pts) { showMsg(el, "no points in " + src); return; }
+
+      pts.material = new THREE.PointsMaterial({
+        size: POINT_SIZE,
+        sizeAttenuation: true,
+        vertexColors: !!pts.geometry.getAttribute("color"),
+        color: pts.geometry.getAttribute("color") ? 0xffffff : 0x9ca3af,
+      });
+
+      // Robust framing: a few stray points can blow up the bounding box and
+      // make the real scene render tiny. Use the median as the center and the
+      // 95th-percentile distance as the radius so outliers are ignored.
+      const pos = pts.geometry.getAttribute("position");
+      const n   = pos.count;
+      const step = Math.max(1, Math.floor(n / 40000));   // subsample for speed
+      const xs = [], ys = [], zs = [];
+      for (let i = 0; i < n; i += step) {
+        xs.push(pos.getX(i)); ys.push(pos.getY(i)); zs.push(pos.getZ(i));
+      }
+      const pct = (arr, p) => {
+        const s = arr.slice().sort((a, b) => a - b);
+        return s[Math.min(s.length - 1, Math.floor(p * s.length))];
+      };
+      const cx = pct(xs, 0.5), cy = pct(ys, 0.5), cz = pct(zs, 0.5);
+      const center = new THREE.Vector3(cx, cy, cz);
+
+      const dists = [];
+      for (let k = 0; k < xs.length; k++) {
+        const dx = xs[k] - cx, dy = ys[k] - cy, dz = zs[k] - cz;
+        dists.push(Math.sqrt(dx * dx + dy * dy + dz * dz));
+      }
+      const radius = pct(dists, 0.95) || 1;
+
+      pts.position.sub(center);
+      scene.add(pts);
+
+      const dist = radius / Math.tan((camera.fov * Math.PI / 180) / 2) * 0.95;
+      camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
+      controls.target.set(0, 0, 0);
+      controls.minDistance = radius * 0.3;
+      controls.maxDistance = dist * 3;
+      controls.update();
+    },
+    undefined,
+    () => showMsg(el, "3D · " + src),   // load error → show expected path
+  );
+
+  // Only animate while the viewer is on-screen.
+  let visible = false;
+  new IntersectionObserver(
+    ([e]) => { visible = e.isIntersecting; },
+    { threshold: 0.05 },
+  ).observe(el);
+
+  resize();
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (!visible) return;
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+}
+
+document.querySelectorAll(".pcv").forEach(initViewer);
+</script>
+
+<!-- ───────────── What We Find ───────────── -->
+<section id="findings" class="py-20 bg-slate-50 border-y border-slate-200">
+  <div class="max-w-6xl mx-auto px-5">
+    <h2 class="text-3xl font-bold text-center">What We Find</h2>
+    <p class="text-center text-slate-600 mt-3 max-w-2xl mx-auto">
+      [One-line summary of headline findings.]
+    </p>
+
+    <!-- big chart placeholder (the 2×4 figure) -->
+    <div class="mt-10 placeholder-img aspect-[13/6] rounded-xl border border-slate-200">
+      MAIN&nbsp;RESULTS&nbsp;FIGURE&nbsp;(2×4)
+    </div>
+
+    <!-- supplementary small chart cells -->
+    <div class="grid md:grid-cols-4 gap-4 mt-8">
+      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;A</div>
+      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;B</div>
+      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;C</div>
+      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;D</div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── Contributions / Resources ───────────── -->
+<section id="resources" class="py-20">
+  <div class="max-w-6xl mx-auto px-5 grid md:grid-cols-4 gap-6">
+    <div class="bg-white rounded-xl border border-slate-200 p-6">
+      <h3 class="font-semibold text-slate-900">Our Benchmark</h3>
+      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
+        <li>[# scenes / # questions]</li>
+        <li>[Task categories]</li>
+        <li>[Condition splits]</li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-6">
+      <h3 class="font-semibold text-slate-900">Key Findings</h3>
+      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
+        <li>[Finding 1]</li>
+        <li>[Finding 2]</li>
+        <li>[Finding 3]</li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-6">
+      <h3 class="font-semibold text-slate-900">For Researchers</h3>
+      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
+        <li>[Eval scripts]</li>
+        <li>[Add-your-model recipe]</li>
+        <li>[Reproducibility]</li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-6">
+      <h3 class="font-semibold text-slate-900">Resources</h3>
+      <ul class="mt-3 text-sm text-sky-700 space-y-1 list-disc list-inside">
+        <li><a href="#" class="hover:underline">Paper (PDF)</a></li>
+        <li><a href="#" class="hover:underline">arXiv</a></li>
+        <li><a href="#" class="hover:underline">GitHub</a></li>
+        <li><a href="#" class="hover:underline">Dataset (HF)</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── BibTeX ───────────── -->
+<section id="bibtex" class="py-16 bg-slate-900 text-slate-100">
+  <div class="max-w-4xl mx-auto px-5">
+    <h2 class="text-2xl font-bold">BibTeX</h2>
+    <pre class="mt-4 bg-slate-950 text-slate-200 text-sm p-5 rounded-lg overflow-x-auto border border-white/10">
+@article{[citekey]2026[short],
+  title   = {[Paper Title]},
+  author  = {[Authors]},
+  journal = {arXiv preprint arXiv:[XXXX.XXXXX]},
+  year    = {2026},
+}</pre>
+  </div>
+</section>
+
+<!-- ───────────── Footer ───────────── -->
+<footer class="py-8 text-center text-xs text-slate-500 border-t border-slate-200">
+  © 2026 [Authors]. Template adapted for [Project Short Name].
+</footer>
+
+</body>
+</html>

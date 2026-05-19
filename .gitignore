@@ -1,0 +1,6 @@
+# Intermediate point clouds — not needed by the site, big.
+exports/
+
+# OS / editor cruft
+.DS_Store
+*.swp
