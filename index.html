@@ -41,11 +41,10 @@
   <div class="max-w-6xl mx-auto px-5 h-12 flex items-center justify-between text-sm">
     <a href="#" class="font-semibold tracking-wide">[SPATIALUNCERTAIN]</a>
     <nav class="hidden md:flex gap-5 text-slate-300">
-      <a href="#problem"     class="hover:text-white">The Problem</a>
-      <a href="#demos"       class="hover:text-white">Demos</a>
-      <a href="#findings"    class="hover:text-white">Findings</a>
-      <a href="#resources"   class="hover:text-white">Resources</a>
-      <a href="#bibtex"      class="hover:text-white">BibTeX</a>
+      <a href="#abstract" class="hover:text-white">Abstract</a>
+      <a href="#demos"    class="hover:text-white">Pipeline</a>
+      <a href="#findings" class="hover:text-white">Results</a>
+      <a href="#bibtex"   class="hover:text-white">BibTeX</a>
     </nav>
   </div>
 </header>
@@ -120,7 +119,7 @@
 <style>
   .pcv {
     position: relative; width: 100%; height: 215px;
-    background: #f1f5f9; border-radius: 0.5rem; overflow: hidden;
+    background: #f5f0e6; border-radius: 0.5rem; overflow: hidden;
     cursor: grab;
   }
   .pcv:active { cursor: grabbing; }
@@ -134,11 +133,11 @@
 
 <section id="demos" class="py-20">
   <div class="max-w-7xl mx-auto px-5">
-    <h2 class="text-3xl font-bold text-center">How the Benchmark Is Built</h2>
-    <p class="text-center text-slate-600 mt-3 max-w-2xl mx-auto">
+    <h2 class="text-3xl font-bold text-center">Constructing SpatialUncertain</h2>
+    <!-- <p class="text-center text-slate-600 mt-3 max-w-2xl mx-auto">
       Two data-generation pipelines, shown stage by stage. The 3D scenes auto-rotate —
       drag to look around.
-    </p>
+    </p> -->
 
     <!-- ░░ Occlusion pipeline ░░ -->
     <div class="mt-14">
@@ -153,7 +152,10 @@
           <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 1</div>
           <h4 class="font-semibold mt-1">3D Scene</h4>
           <div class="pcv mt-3" data-src="models/occ_clean.glb"></div>
-          <video class="walk-vid mt-2 rounded-lg w-full h-[235px] object-cover bg-slate-100"
+          <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">🎯 Target: Full-length mirror</span>
+          </div>
+          <video class="walk-vid mt-3 rounded-lg w-full h-[235px] object-cover bg-slate-100"
                  src="videos/occ_clean.mp4" autoplay muted loop playsinline></video>
           <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
             A clean 3D indoor scene with the target object fully visible.
@@ -165,7 +167,11 @@
           <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 2</div>
           <h4 class="font-semibold mt-1">+ Occluder Injected</h4>
           <div class="pcv mt-3" data-src="models/occ_occluder.glb"></div>
-          <video class="walk-vid mt-2 rounded-lg w-full h-[235px] object-cover bg-slate-100"
+          <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">🎯 Target: Full-length mirror</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">🧱 Occluder: Wardrobe</span>
+          </div>
+          <video class="walk-vid mt-3 rounded-lg w-full h-[235px] object-cover bg-slate-100"
                  src="videos/occ_occluder.mp4" autoplay muted loop playsinline></video>
           <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
             An occluder object is added between the camera and the target.
@@ -176,18 +182,22 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
           <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 3</div>
           <h4 class="font-semibold mt-1">Views &amp; QA Generation</h4>
-          <img class="auto-img mt-3 rounded-lg w-full object-cover" style="height:215px"
-               src="images/occ_view.png" alt="occluded rendered view" />
-          <div class="mt-3 rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs space-y-2">
-            <p class="text-slate-500">Q: What's the relationship between the bench and the door?</p>
-            <p><span class="text-emerald-600 font-semibold">Clean:</span> answerable → "Left"</p>
-            <p><span class="text-rose-600 font-semibold">Occluded:</span> abstain → "Cannot Determine"</p>
+
+          <!-- question (cycles through the 4 task types) -->
+          <div id="occ-qa" class="mt-3 rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs min-h-[3.5rem]">
+            <div class="text-[10px] uppercase tracking-widest text-amber-600 font-semibold occ-qtype"></div>
+            <p class="mt-1"><span class="text-slate-500">Q:</span> <span class="occ-q"></span></p>
           </div>
-          <p class="text-xs text-slate-600 mt-3 leading-relaxed flex-1">
-            Depending on the camera the target is clean, partially, or fully occluded.
-            Visibility, Relative Position, Depth Ordering &amp; Size questions are
-            answerable clean but require abstention once occluded.
-          </p>
+
+          <!-- clean view + answer -->
+          <img class="auto-img mt-3 rounded w-full h-auto"
+               src="images/occ_view_clean.png" alt="clean rendered view" />
+          <p class="mt-2 text-xs"><span class="text-slate-500 font-semibold">Clean:</span> <span class="text-emerald-600 font-semibold">answerable → "<span class="occ-a-clean"></span>"</span></p>
+
+          <!-- occluded view + answer -->
+          <img class="auto-img mt-3 rounded w-full h-auto"
+               src="images/occ_view.png" alt="occluded rendered view" />
+          <p class="mt-2 mb-1 text-xs flex-1"><span class="text-slate-500 font-semibold">Occluded:</span> <span class="text-rose-600 font-semibold">abstain → "Cannot Determine"</span></p>
         </div>
 
       </div>
@@ -263,6 +273,31 @@ document.querySelectorAll("video.walk-vid").forEach((v) => {
   v.addEventListener("loadedmetadata", setRate);
   v.addEventListener("play", setRate);
 });
+
+// Occlusion Step 3: cycle the question box through the 4 task types.
+// Clean answer changes per type; occluded answer is always abstention.
+const OCC_QA = [
+  { type: "Visibility",        q: "Is the full-length mirror visible?",                          a: "Yes" },
+  { type: "Relative Position", q: "Where is the mirror relative to the window?",               a: "right of it" },
+  { type: "Depth Ordering",    q: "Which is closer to the camera, the mirror or the wardrobe?",  a: "Same" },
+  { type: "Size Comparison",   q: "Is the mirror taller than the wardrobe?",                        a: "No" },
+];
+(function () {
+  const box = document.getElementById("occ-qa");
+  if (!box) return;
+  const qtype = box.querySelector(".occ-qtype");
+  const q     = box.querySelector(".occ-q");
+  const aDoc  = document;
+  let i = 0;
+  function render() {
+    const item = OCC_QA[i];
+    qtype.textContent = item.type;
+    q.textContent     = item.q;
+    aDoc.querySelector(".occ-a-clean").textContent = item.a;
+  }
+  render();
+  setInterval(() => { i = (i + 1) % OCC_QA.length; render(); }, 2800);
+})();
 </script>
 
 <script type="module">
@@ -271,8 +306,9 @@ document.querySelectorAll("video.walk-vid").forEach((v) => {
 // auto-rotation, and drag-to-orbit. Bigger points fill the gaps between samples
 // so the cloud reads as a continuous surface instead of sparse pinpricks.
 import * as THREE from "three";
-import { GLTFLoader }    from "three/addons/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader }     from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls }  from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 // Tweak here if it still looks sparse/dense:
 const POINT_SIZE   = 0.018;   // world-space point radius (bigger = denser look)
@@ -289,7 +325,7 @@ function initViewer(el) {
   const src = el.dataset.src;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf1f5f9);
+  scene.background = new THREE.Color(0xf5f0e6);
 
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
 
@@ -316,43 +352,88 @@ function initViewer(el) {
   new GLTFLoader().load(
     src,
     (gltf) => {
-      let pts = null;
-      gltf.scene.traverse((o) => { if (o.isPoints) pts = o; });
-      if (!pts) { showMsg(el, "no points in " + src); return; }
-
-      pts.material = new THREE.PointsMaterial({
-        size: POINT_SIZE,
-        sizeAttenuation: true,
-        vertexColors: !!pts.geometry.getAttribute("color"),
-        color: pts.geometry.getAttribute("color") ? 0xffffff : 0x9ca3af,
+      const points = [];
+      let hasMesh = false;
+      gltf.scene.traverse((o) => {
+        if (o.isPoints) points.push(o);
+        if (o.isMesh)   hasMesh = true;
       });
 
-      // Robust framing: a few stray points can blow up the bounding box and
-      // make the real scene render tiny. Use the median as the center and the
-      // 95th-percentile distance as the radius so outliers are ignored.
-      const pos = pts.geometry.getAttribute("position");
-      const n   = pos.count;
-      const step = Math.max(1, Math.floor(n / 40000));   // subsample for speed
-      const xs = [], ys = [], zs = [];
-      for (let i = 0; i < n; i += step) {
-        xs.push(pos.getX(i)); ys.push(pos.getY(i)); zs.push(pos.getZ(i));
+      for (const p of points) {
+        p.material = new THREE.PointsMaterial({
+          size: POINT_SIZE,
+          sizeAttenuation: true,
+          vertexColors: !!p.geometry.getAttribute("color"),
+          color: p.geometry.getAttribute("color") ? 0xffffff : 0x9ca3af,
+        });
       }
-      const pct = (arr, p) => {
-        const s = arr.slice().sort((a, b) => a - b);
-        return s[Math.min(s.length - 1, Math.floor(p * s.length))];
-      };
-      const cx = pct(xs, 0.5), cy = pct(ys, 0.5), cz = pct(zs, 0.5);
-      const center = new THREE.Vector3(cx, cy, cz);
 
-      const dists = [];
-      for (let k = 0; k < xs.length; k++) {
-        const dx = xs[k] - cx, dy = ys[k] - cy, dz = zs[k] - cz;
-        dists.push(Math.sqrt(dx * dx + dy * dy + dz * dz));
+      if (hasMesh) {
+        // Image-based lighting so glTF PBR materials don't render black.
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x9c9385, 1.15));
+        const key = new THREE.DirectionalLight(0xffffff, 1.3);
+        key.position.set(3, 5, 2); scene.add(key);
+        const fill = new THREE.DirectionalLight(0xffffff, 0.5);
+        fill.position.set(-3, 2, -2); scene.add(fill);
+
+        // Synthesized shell styling by node-name prefix. Walls ghost so the
+        // furniture is visible; floor solid; glass = clearly visible window;
+        // door = solid panel. Furniture (obj_*) untouched → opaque.
+        const kindOf = (o) => {
+          for (let n = o; n; n = n.parent) {
+            const m = /^(wall|floor|glass|door)/.exec(n.name || "");
+            if (m) return m[1];
+          }
+          return null;
+        };
+        gltf.scene.traverse((o) => {
+          if (!o.isMesh) return;
+          const mat = o.material, k = kindOf(o);
+          // Colors are baked into the GLB; the viewer only sets opacity/side.
+          if (k === "wall") {
+            mat.transparent = true; mat.opacity = 0.30;
+            mat.depthWrite = false; mat.side = THREE.DoubleSide;
+          } else if (k === "glass") {
+            mat.transparent = true; mat.opacity = 0.55;
+            mat.side = THREE.DoubleSide;
+          } else if (k === "floor" || k === "door") {
+            mat.side = THREE.DoubleSide;   // solid, just visible from both sides
+          }
+        });
       }
-      const radius = pct(dists, 0.95) || 1;
 
-      pts.position.sub(center);
-      scene.add(pts);
+      // Frame by the point cloud (robust) if present, else mesh bounding box.
+      let center, radius;
+      if (points.length) {
+        const pos = points[0].geometry.getAttribute("position");
+        const n = pos.count, step = Math.max(1, Math.floor(n / 40000));
+        const xs = [], ys = [], zs = [];
+        for (let i = 0; i < n; i += step) {
+          xs.push(pos.getX(i)); ys.push(pos.getY(i)); zs.push(pos.getZ(i));
+        }
+        const pct = (arr, p) => {
+          const s = arr.slice().sort((a, b) => a - b);
+          return s[Math.min(s.length - 1, Math.floor(p * s.length))];
+        };
+        const cx = pct(xs, 0.5), cy = pct(ys, 0.5), cz = pct(zs, 0.5);
+        center = new THREE.Vector3(cx, cy, cz);
+        const dists = [];
+        for (let k = 0; k < xs.length; k++) {
+          const dx = xs[k]-cx, dy = ys[k]-cy, dz = zs[k]-cz;
+          dists.push(Math.sqrt(dx*dx + dy*dy + dz*dz));
+        }
+        radius = pct(dists, 0.95) || 1;
+      } else {
+        const box  = new THREE.Box3().setFromObject(gltf.scene);
+        center     = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        radius     = Math.max(size.x, size.y, size.z) * 0.5 || 1;
+      }
+      gltf.scene.position.sub(center);
+      scene.add(gltf.scene);
 
       const dist = radius / Math.tan((camera.fov * Math.PI / 180) / 2) * 0.95;
       camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
@@ -388,61 +469,111 @@ document.querySelectorAll(".pcv").forEach(initViewer);
 <section id="findings" class="py-20 bg-slate-50 border-y border-slate-200">
   <div class="max-w-6xl mx-auto px-5">
     <h2 class="text-3xl font-bold text-center">What We Find</h2>
-    <p class="text-center text-slate-600 mt-3 max-w-2xl mx-auto">
-      [One-line summary of headline findings.]
+    <p class="text-center text-slate-600 mt-3 max-w-3xl mx-auto">
+      Frontier VLMs answer confidently but rarely recognize when they
+      <em>can't</em>: accuracy on unanswerable cases collapses far below
+      answerable accuracy, and viewpoint selection is often near random.
     </p>
 
-    <!-- big chart placeholder (the 2×4 figure) -->
-    <div class="mt-10 placeholder-img aspect-[13/6] rounded-xl border border-slate-200">
-      MAIN&nbsp;RESULTS&nbsp;FIGURE&nbsp;(2×4)
+    <div class="mt-10 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full text-sm text-right tabular-nums">
+        <thead>
+          <tr class="border-b border-slate-200 text-slate-500">
+            <th rowspan="2" class="px-4 py-2 text-left font-semibold align-bottom">Model</th>
+            <th colspan="3" class="px-3 py-2 text-center font-semibold border-l border-slate-200">Occlusion</th>
+            <th colspan="3" class="px-3 py-2 text-center font-semibold border-l border-slate-200">Perspective Ambiguity</th>
+            <th colspan="2" class="px-3 py-2 text-center font-semibold border-l border-slate-200">Viewpoint</th>
+          </tr>
+          <tr class="border-b border-slate-200 text-xs text-slate-500">
+            <th class="px-3 py-1.5 border-l border-slate-200">Ans.</th><th class="px-3 py-1.5">Unans.</th><th class="px-3 py-1.5">All</th>
+            <th class="px-3 py-1.5 border-l border-slate-200">Ans.</th><th class="px-3 py-1.5">Unans.</th><th class="px-3 py-1.5">All</th>
+            <th class="px-3 py-1.5 border-l border-slate-200">ViewS</th><th class="px-3 py-1.5">AbsViewS</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-700">
+          <tr class="border-b border-slate-200 italic text-slate-400">
+            <td class="px-4 py-1.5 text-left">Random</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">32.3</td><td>23.3</td><td>30.0</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">25.0</td><td>25.9</td><td>25.0</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">20.0</td><td class="px-3">4.0</td>
+          </tr>
+          <tr class="bg-slate-100/70 text-xs uppercase tracking-wide text-slate-500">
+            <td class="px-4 py-1 text-left font-semibold" colspan="9">Open-source</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">Qwen2.5-VL-7B</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">51.1</td><td>39.3</td><td>48.0</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">62.4</td><td class="font-bold text-slate-900">41.5</td><td>57.8</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">24.6</td><td class="px-3">8.6</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">Qwen2.5-VL-32B</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">51.7</td><td>40.0</td><td>48.6</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">69.0</td><td>21.7</td><td>58.5</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">20.7</td><td class="px-3">4.6</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">InternVL3-8B</td>
+            <td class="px-3 py-1.5 border-l border-slate-100 font-bold text-slate-900">61.7</td><td>7.3</td><td>47.5</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">70.4</td><td>1.1</td><td>55.1</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">18.5</td><td class="px-3">0.0</td>
+          </tr>
+          <tr class="bg-slate-100/70 text-xs uppercase tracking-wide text-slate-500">
+            <td class="px-4 py-1 text-left font-semibold" colspan="9">Closed-source</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">GPT-4o</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">53.9</td><td>32.8</td><td>48.4</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">35.2</td><td>36.3</td><td>35.4</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">39.3</td><td class="px-3">22.1</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">GPT-5-mini</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">64.7</td><td>7.8</td><td>49.9</td>
+            <td class="px-3 py-1.5 border-l border-slate-100 font-bold text-slate-900">76.1</td><td>15.2</td><td class="font-bold text-slate-900">62.2</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">53.7</td><td class="px-3">18.0</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">GPT-5.4</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">58.2</td><td>19.5</td><td>48.1</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">69.5</td><td>22.6</td><td>59.2</td>
+            <td class="px-3 py-1.5 border-l border-slate-100 font-bold text-slate-900">70.9</td><td class="px-3 font-bold text-slate-900">22.6</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-4 py-1.5 text-left">Gemini-2.5-Flash</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">56.1</td><td class="font-bold text-slate-900">45.0</td><td>53.2</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">66.4</td><td>2.4</td><td>52.2</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">18.5</td><td class="px-3">6.7</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-1.5 text-left">Gemini-3.0-Flash</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">61.7</td><td>44.1</td><td class="font-bold text-slate-900">57.1</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">64.0</td><td>6.3</td><td>51.3</td>
+            <td class="px-3 py-1.5 border-l border-slate-100">50.3</td><td class="px-3">2.4</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <p class="mt-3 text-xs text-slate-500 leading-relaxed max-w-4xl">
+      <strong>Table 1.</strong> Performance under occlusion and perspective ambiguity.
+      <strong>Ans.</strong> = accuracy on answerable questions;
+      <strong>Unans.</strong> = ability to correctly identify unanswerable cases;
+      <strong>ViewS</strong> / <strong>AbsViewS</strong> = ViewSel and AbstainViewSel
+      (viewpoint selection with and without the abstention stage).
+      Bold = best in column.
+    </p>
 
-    <!-- supplementary small chart cells -->
-    <div class="grid md:grid-cols-4 gap-4 mt-8">
-      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;A</div>
-      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;B</div>
-      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;C</div>
-      <div class="placeholder-img aspect-video rounded-md">CHART&nbsp;D</div>
-    </div>
-  </div>
-</section>
-
-<!-- ───────────── Contributions / Resources ───────────── -->
-<section id="resources" class="py-20">
-  <div class="max-w-6xl mx-auto px-5 grid md:grid-cols-4 gap-6">
-    <div class="bg-white rounded-xl border border-slate-200 p-6">
-      <h3 class="font-semibold text-slate-900">Our Benchmark</h3>
-      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
-        <li>[# scenes / # questions]</li>
-        <li>[Task categories]</li>
-        <li>[Condition splits]</li>
-      </ul>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-6">
-      <h3 class="font-semibold text-slate-900">Key Findings</h3>
-      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
-        <li>[Finding 1]</li>
-        <li>[Finding 2]</li>
-        <li>[Finding 3]</li>
-      </ul>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-6">
-      <h3 class="font-semibold text-slate-900">For Researchers</h3>
-      <ul class="mt-3 text-sm text-slate-600 space-y-1 list-disc list-inside">
-        <li>[Eval scripts]</li>
-        <li>[Add-your-model recipe]</li>
-        <li>[Reproducibility]</li>
-      </ul>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-6">
-      <h3 class="font-semibold text-slate-900">Resources</h3>
-      <ul class="mt-3 text-sm text-sky-700 space-y-1 list-disc list-inside">
-        <li><a href="#" class="hover:underline">Paper (PDF)</a></li>
-        <li><a href="#" class="hover:underline">arXiv</a></li>
-        <li><a href="#" class="hover:underline">GitHub</a></li>
-        <li><a href="#" class="hover:underline">Dataset (HF)</a></li>
-      </ul>
-    </div>
+    <figure class="mt-12">
+      <img src="images/results_fig.png"
+           alt="Per-task accuracy across question types under occlusion (top) and perspective ambiguity (bottom), split by answerable / unanswerable conditions."
+           class="w-full h-auto rounded-xl border border-slate-200 bg-white" />
+      <figcaption class="mt-3 text-xs text-slate-500 leading-relaxed max-w-4xl">
+        <strong>Figure 5.</strong> Model accuracy across question types under occlusion
+        (top) and perspective ambiguity (bottom). Blue / orange backgrounds mark
+        answerable vs. unanswerable conditions; dashed lines are the random baseline.
+        Bold lines highlight the strongest closed-source models in each setting.
+      </figcaption>
+    </figure>
   </div>
 </section>
 
