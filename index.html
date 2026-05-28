@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>[Project Title] — Project Page</title>
+<title>SpatialUncertain — Project Page</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="importmap">
 {
@@ -128,6 +128,14 @@
     text-align: center; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
     color: #94a3b8; pointer-events: none; padding: 1rem;
   }
+  .pcv .pcv-reset {
+    position: absolute; top: 6px; right: 6px; z-index: 10;
+    background: rgba(255,255,255,0.82); border: 1px solid #cbd5e1;
+    border-radius: 5px; padding: 2px 7px; font-size: 11px; font-weight: 600;
+    color: #475569; cursor: pointer; line-height: 1.6; backdrop-filter: blur(4px);
+    transition: background 0.15s;
+  }
+  .pcv .pcv-reset:hover { background: rgba(255,255,255,0.97); }
 </style>
 
 <section id="demos" class="py-20">
@@ -516,11 +524,23 @@ function initViewer(el) {
       scene.add(gltf.scene);
 
       const dist = radius / Math.tan((camera.fov * Math.PI / 180) / 2) * 0.95;
-      camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
+      const initPos = new THREE.Vector3(dist * 0.8, dist * 0.45, dist * 0.8);
+      camera.position.copy(initPos);
       controls.target.set(0, 0, 0);
       controls.minDistance = radius * 0.3;
       controls.maxDistance = dist * 3;
       controls.update();
+
+      // Reset button
+      const btn = document.createElement("button");
+      btn.className = "pcv-reset";
+      btn.textContent = "↺ Reset";
+      btn.addEventListener("click", () => {
+        camera.position.copy(initPos);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      });
+      el.appendChild(btn);
     },
     undefined,
     () => showMsg(el, "3D · " + src),   // load error → show expected path
