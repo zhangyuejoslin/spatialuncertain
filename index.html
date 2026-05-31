@@ -158,7 +158,7 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
           <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 1</div>
           <h4 class="font-semibold mt-1">3D Scene</h4>
-          <div class="pcv mt-3" data-src="models/occ_clean.glb"></div>
+          <div class="pcv mt-3" data-src="models/occ_clean.glb" data-sync-group="occ"></div>
           <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
             <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">🎯 Target: Full-length mirror</span>
           </div>
@@ -173,7 +173,7 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col">
           <div class="text-xs uppercase tracking-widest text-amber-600 font-semibold">Step 2</div>
           <h4 class="font-semibold mt-1">+ Occluder Injected</h4>
-          <div class="pcv mt-3" data-src="models/occ_occluder.glb"></div>
+          <div class="pcv mt-3" data-src="models/occ_occluder.glb" data-sync-group="occ"></div>
           <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
             <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">🎯 Target: Full-length mirror</span>
             <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">🧱 Occluder: Wardrobe</span>
@@ -402,6 +402,10 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 const POINT_SIZE   = 0.018;   // world-space point radius (bigger = denser look)
 const ROTATE_SPEED = 2.3;     // auto-rotation speed
 
+// Sync groups: viewers with the same data-sync-group share reset and initial angle.
+// key → [{camera, controls, initPos, syncing}]
+const syncGroups = {};
+
 function showMsg(el, text) {
   const m = document.createElement("div");
   m.className = "pcv-msg";
@@ -411,11 +415,20 @@ function showMsg(el, text) {
 
 function initViewer(el) {
   const src = el.dataset.src;
+  const groupKey = el.dataset.syncGroup || null;
+
+  // Pre-register entry so other viewers in the same group can find it.
+  const groupEntry = { camera: null, controls: null, initPos: null, syncing: false };
+  if (groupKey) {
+    if (!syncGroups[groupKey]) syncGroups[groupKey] = [];
+    syncGroups[groupKey].push(groupEntry);
+  }
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf5f0e6);
 
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
+  groupEntry.camera = camera;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -427,6 +440,7 @@ function initViewer(el) {
   controls.enablePan = false;
   controls.autoRotate = true;
   controls.autoRotateSpeed = ROTATE_SPEED;
+  groupEntry.controls = controls;
 
   function resize() {
     const w = el.clientWidth, h = el.clientHeight;
@@ -531,14 +545,54 @@ function initViewer(el) {
       controls.maxDistance = dist * 3;
       controls.update();
 
-      // Reset button
+      if (groupKey) {
+        groupEntry.initPos = initPos.clone();
+
+        // When all viewers in the group have loaded, snap them to the same
+        // initial angle so their auto-rotation stays perfectly in phase.
+        const group = syncGroups[groupKey];
+        if (group.every(e => e.initPos)) {
+          const refSph = new THREE.Spherical().setFromVector3(group[0].initPos);
+          for (const e of group) {
+            const r = e.initPos.length();
+            e.camera.position.setFromSphericalCoords(r, refSph.phi, refSph.theta);
+            e.controls.target.set(0, 0, 0);
+            e.controls.update();
+          }
+        }
+
+        // While the user drags this viewer, mirror the angle to the others.
+        controls.addEventListener("change", () => {
+          if (groupEntry.syncing) return;
+          const sph = new THREE.Spherical().setFromVector3(camera.position);
+          for (const other of syncGroups[groupKey]) {
+            if (other === groupEntry || !other.initPos) continue;
+            other.syncing = true;
+            const r = other.camera.position.length();
+            other.camera.position.setFromSphericalCoords(r, sph.phi, sph.theta);
+            other.controls.target.set(0, 0, 0);
+            other.controls.update();
+            other.syncing = false;
+          }
+        });
+      }
+
+      // Reset button — resets every viewer in the same sync group.
       const btn = document.createElement("button");
       btn.className = "pcv-reset";
       btn.textContent = "↺ Reset";
       btn.addEventListener("click", () => {
-        camera.position.copy(initPos);
-        controls.target.set(0, 0, 0);
-        controls.update();
+        const targets = groupKey ? syncGroups[groupKey] : [{ camera, controls, initPos }];
+        const refPos = groupKey ? syncGroups[groupKey].find(e => e.initPos)?.initPos : initPos;
+        if (!refPos) return;
+        const refSph = new THREE.Spherical().setFromVector3(refPos);
+        for (const t of targets) {
+          if (!t.initPos) continue;
+          const r = t.initPos.length();
+          t.camera.position.setFromSphericalCoords(r, refSph.phi, refSph.theta);
+          t.controls.target.set(0, 0, 0);
+          t.controls.update();
+        }
       });
       el.appendChild(btn);
     },
