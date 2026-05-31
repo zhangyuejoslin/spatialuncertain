@@ -400,7 +400,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 // Tweak here if it still looks sparse/dense:
 const POINT_SIZE   = 0.018;   // world-space point radius (bigger = denser look)
-const ROTATE_SPEED = 2.3;     // auto-rotation speed
+const ROTATE_SPEED = 0.8;     // auto-rotation speed
 
 // Sync groups: viewers with the same data-sync-group share reset and initial angle.
 // key → [{camera, controls, initPos, syncing}]
@@ -418,7 +418,7 @@ function initViewer(el) {
   const groupKey = el.dataset.syncGroup || null;
 
   // Pre-register entry so other viewers in the same group can find it.
-  const groupEntry = { camera: null, controls: null, initPos: null, syncing: false };
+  const groupEntry = { camera: null, controls: null, initPos: null };
   if (groupKey) {
     if (!syncGroups[groupKey]) syncGroups[groupKey] = [];
     syncGroups[groupKey].push(groupEntry);
@@ -549,7 +549,7 @@ function initViewer(el) {
         groupEntry.initPos = initPos.clone();
 
         // When all viewers in the group have loaded, snap them to the same
-        // initial angle so their auto-rotation stays perfectly in phase.
+        // initial angle so their auto-rotation starts in phase.
         const group = syncGroups[groupKey];
         if (group.every(e => e.initPos)) {
           const refSph = new THREE.Spherical().setFromVector3(group[0].initPos);
@@ -560,21 +560,6 @@ function initViewer(el) {
             e.controls.update();
           }
         }
-
-        // While the user drags this viewer, mirror the angle to the others.
-        controls.addEventListener("change", () => {
-          if (groupEntry.syncing) return;
-          const sph = new THREE.Spherical().setFromVector3(camera.position);
-          for (const other of syncGroups[groupKey]) {
-            if (other === groupEntry || !other.initPos) continue;
-            other.syncing = true;
-            const r = other.camera.position.length();
-            other.camera.position.setFromSphericalCoords(r, sph.phi, sph.theta);
-            other.controls.target.set(0, 0, 0);
-            other.controls.update();
-            other.syncing = false;
-          }
-        });
       }
 
       // Reset button — resets every viewer in the same sync group.
